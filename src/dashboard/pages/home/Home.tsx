@@ -1,128 +1,142 @@
 import { Card } from "primereact/card";
 import { DataScroller } from "primereact/datascroller";
-
-type ListItem = {
-  user: string;
-  image: string;
-  follow: "follow" | "unfollow"; // Restricting to specific string values
-  cap: string;
-  like: boolean;
-  comment: string;
-};
-
-const listData: ListItem[] = [
-  {
-    user: "Kingshuk Mondal",
-    image: "pi pi-user",
-    follow: "follow",
-    cap: "I am a good boy",
-    like: true,
-    comment: "Something about me",
-  },
-  {
-    user: "Ananya Sharma",
-    image: "pi pi-user",
-    follow: "unfollow",
-    cap: "Exploring the world!",
-    like: false,
-    comment: "Loving the journey",
-  },
-  {
-    user: "Rohan Das",
-    image: "pi pi-user",
-    follow: "follow",
-    cap: "Living the dream",
-    like: true,
-    comment: "Success is the best revenge",
-  },
-  {
-    user: "Priya Sen",
-    image: "pi pi-user",
-    follow: "follow",
-    cap: "Coffee addict ☕",
-    like: false,
-    comment: "Morning vibes are the best",
-  },
-  {
-    user: "Arjun Singh",
-    image: "pi pi-user",
-    follow: "unfollow",
-    cap: "Coding is my therapy",
-    like: true,
-    comment: "100 days of code!",
-  },
-  {
-    user: "Ishita Roy",
-    image: "pi pi-user",
-    follow: "follow",
-    cap: "Book lover 📚",
-    like: false,
-    comment: "Currently reading 'Atomic Habits'",
-  },
-  {
-    user: "Rahul Mehta",
-    image: "pi pi-user",
-    follow: "unfollow",
-    cap: "Fitness is life",
-    like: true,
-    comment: "Back at the gym!",
-  },
-  {
-    user: "Aditi Kapoor",
-    image: "pi pi-user",
-    follow: "follow",
-    cap: "Travel enthusiast ✈️",
-    like: false,
-    comment: "Wanderlust forever",
-  },
-  {
-    user: "Vikram Patel",
-    image: "pi pi-user",
-    follow: "unfollow",
-    cap: "Nature's child 🌳",
-    like: true,
-    comment: "Enjoying a serene sunset",
-  },
-  {
-    user: "Sanya Verma",
-    image: "pi pi-user",
-    follow: "follow",
-    cap: "Foodie 🍕",
-    like: false,
-    comment: "Best pizza in town!",
-  },
-];
-
-const itemTemplate = (data: ListItem) => {
-  return (
-    <Card className="w-full h-[500px] ">
-      <div>
-        <div>
-          <div>{data.user}</div>
-          <div>{data.comment}</div>
-        </div>
-      </div>
-    </Card>
-  );
-};
+import { Avatar } from "primereact/avatar";
+import { Button } from "primereact/button";
+import { OrderList } from "primereact/orderlist";
+import { FileUpload } from "primereact/fileupload";
+import { RiUserFollowLine } from "react-icons/ri";
+import { GrLike, GrDislike } from "react-icons/gr";
+import { FaRegCommentAlt } from "react-icons/fa";
+import { useState } from "react";
+import {
+  activeFriends,
+  listData,
+  ListItem,
+  ActiveFriends,
+} from "../../../assets/DummyData"; // Ensure these paths are correct
+import { InputTextarea } from "primereact/inputtextarea";
+import { InputText } from "primereact/inputtext";
 
 function Home() {
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [value, setValue] = useState<string>("");
+  const handleFileUpload = (event: { files: File[] }) => {
+    const files = event.files;
+    setUploadedFiles((prev) => {
+      const updatedFiles = [...prev, ...files];
+      return updatedFiles;
+    });
+  };
+
+  const itemTemplateList = (data: ListItem) => {
+    return (
+      <Card className="w-full pl-28">
+        <div className="w-full h-full">
+          <div>
+            <div className="flex flex-row gap-4 items-center">
+              <Avatar
+                image={data.image}
+                size="xlarge"
+                shape="circle"
+                className="border-4 border-blue-400"
+              />
+              <div className="text-2xl font-bold">{data.user}</div>
+              <Button rounded className="flex flex-row gap-1 items-center">
+                <RiUserFollowLine />
+                <span>{data.follow}</span>
+              </Button>
+            </div>
+            <div className="mb-6 mt-12 text-lg text-gray-400">{data.cap}</div>
+          </div>
+          <div className="flex justify-center items-center h-[300px] overflow-hidden">
+            <img
+              src={data.image}
+              alt="Post"
+              className="max-h-full max-w-full object-contain"
+            />
+          </div>
+          <div className="m-4 flex flex-row gap-20 items-center">
+            {!data.like ? (
+              <GrDislike className="" size={30} />
+            ) : (
+              <GrLike className="" size={30} />
+            )}
+            <div>{data.comment && <FaRegCommentAlt size={30} />}</div>
+          </div>
+        </div>
+      </Card>
+    );
+  };
+
+  console.log("uploding", uploadedFiles);
+
+  const itemTemplate = (item: ActiveFriends) => {
+    return (
+      <div className="flex flex-wrap p-2 align-items-center gap-3 flex-row items-center">
+        <Avatar
+          image={item.image}
+          size="xlarge"
+          shape="circle"
+          className="border-4 border-blue-400"
+        />
+        <div className="flex-1 flex flex-column gap-2 xl:mr-8">
+          <span className="font-bold">{item.user}</span>
+        </div>
+        <span className="font-bold text-900">{item.active}</span>
+      </div>
+    );
+  };
+
   return (
-    <div className="w-full flex flex-row ">
-      <div className="w-[50%]  border-r-4 border-r-blue-400 ">
+    <div className="w-full flex flex-row">
+      {/* Left Section with Scrollable DataScroller */}
+      <div className="w-[50%] border-r-4 border-r-blue-400 h-screen">
         <DataScroller
           value={listData}
-          itemTemplate={itemTemplate}
+          itemTemplate={itemTemplateList}
           rows={5}
           inline
-          scrollHeight="100vh"
           header="Scroll Down to see new posts"
-          className="custom-scroller"
+          className="custom-scroller h-full overflow-y-scroll"
         />
       </div>
-      <div className="h-screen w-[50%]  flex flex-col ">
-        <div className="h-[30%] w-full "></div>
-        <div className=" h-[70%] w-full border-t-blue-400 border-t-4"></div>
+
+      {/* Right Section */}
+      <div className="h-screen w-[50%] flex flex-col">
+        <div className="h-[40%] w-full flex flex-row justify-center items-center">
+          <Card className="w-[500px] h-[350px] border-2 border-blue-400 rounded-lg">
+            <div className="card flex justify-content-center justify-center mb-4">
+              <FileUpload
+                mode="advanced"
+                name="demo[]"
+                customUpload
+                accept="image/*"
+                maxFileSize={1000000}
+                onUpload={handleFileUpload}
+                chooseLabel="Add Image" // Custom label for the choose button
+                uploadLabel="Upload" // Custom label for the upload button
+                cancelLabel="Cancel" // Custom label for the cancel button
+              />
+            </div>
+            <div className="card flex justify-content-center flex-row gap-2 items-center">
+              <label className=" text-lg">Deception</label>
+              <InputText value={value} onChange={(e)=> {e.target.value}}/>
+            </div>
+            <div className="mt-4 flex flex-row justify-end items-center">
+              <Button label="Add Post"/>
+            </div>
+          </Card>
+        </div>
+        <div className="h-[60%] w-full flex flex-row justify-center items-center border-t-blue-400 border-t-4">
+          <Card>
+            <OrderList
+              dataKey="id"
+              value={activeFriends}
+              itemTemplate={itemTemplate}
+              header="Active Friends"
+            />
+          </Card>
+        </div>
       </div>
     </div>
   );
