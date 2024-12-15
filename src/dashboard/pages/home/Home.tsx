@@ -14,7 +14,6 @@ import {
   ListItem,
   ActiveFriends,
 } from "../../../assets/DummyData"; // Ensure these paths are correct
-import { InputTextarea } from "primereact/inputtextarea";
 import { InputText } from "primereact/inputtext";
 
 function Home() {
@@ -27,6 +26,8 @@ function Home() {
       return updatedFiles;
     });
   };
+
+  
 
   const itemTemplateList = (data: ListItem) => {
     return (
@@ -120,7 +121,7 @@ function Home() {
             </div>
             <div className="card flex justify-content-center flex-row gap-2 items-center">
               <label className=" text-lg">Deception</label>
-              <InputText value={value} onChange={(e)=> {e.target.value}}/>
+              <InputText value={value} onChange={(e)=> setValue(e.target.value)}/>
             </div>
             <div className="mt-4 flex flex-row justify-end items-center">
               <Button label="Add Post"/>

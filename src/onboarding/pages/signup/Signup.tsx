@@ -10,6 +10,8 @@ import { InputText } from 'primereact/inputtext';
 import ValidationMessage from '../../../components/ValidationMessage';
 import { useNavigate } from 'react-router-dom';
 import { Routs } from '../../../Routs';
+import supabase from '../../../config/superBaseClient';
+//import toast from 'react-hot-toast';
 
 function Signup() {
   
@@ -27,7 +29,18 @@ const validationSchema = Yup.object({
   const navigateToLogin = () =>  {
      navigate(Routs.login)
   }
-
+  const doSingUp = async (values: SignupData) => {
+    const{data,error} = await supabase.from("social-media").insert([{userName: values.userName,email: values.email,password: values.password}])
+    console.log("===>",data)
+    console.log("err",error)
+  };
+	const onSubmit = async (
+		values: SignupData,
+		setSubmitting: (isSubmitting: boolean) => void
+	) => {
+		await doSingUp(values);
+		setSubmitting(false);
+	};
   return (
     <div
       className={classNames(
@@ -46,9 +59,16 @@ const validationSchema = Yup.object({
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
-            onSubmit={(values) => {
-              console.log("====>",values)
-            }}
+						onSubmit={(
+							values,
+							{ setSubmitting }
+						) => {
+							onSubmit(
+								values,
+								setSubmitting
+							);
+						}
+            }
           >
             {({
               values,
