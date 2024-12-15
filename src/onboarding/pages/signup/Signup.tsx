@@ -1,46 +1,70 @@
-
-import { Button } from 'primereact/button';
-import { Card } from 'primereact/card';
-import { SignupData } from '../../../utils/Types';
+import { Button } from "primereact/button";
+import { Card } from "primereact/card";
+import { SignupData } from "../../../utils/Types";
 import * as Yup from "yup";
-import { classNames } from 'primereact/utils';
-import { Form, Formik } from 'formik';
-import Required from '../../../components/Requied';
-import { InputText } from 'primereact/inputtext';
-import ValidationMessage from '../../../components/ValidationMessage';
-import { useNavigate } from 'react-router-dom';
-import { Routs } from '../../../Routs';
-import supabase from '../../../config/superBaseClient';
-//import toast from 'react-hot-toast';
+import { classNames } from "primereact/utils";
+import { Form, Formik } from "formik";
+import Required from "../../../components/Requied";
+import { InputText } from "primereact/inputtext";
+import ValidationMessage from "../../../components/ValidationMessage";
+import {  useNavigate } from "react-router-dom";
+import { Routs } from "../../../Routs";
+import { supabase } from "../../../config/superBaseClient";
+import toast from 'react-hot-toast';
+import { useEffect } from "react";
 
 function Signup() {
+  const navigate = useNavigate();
+  const initialValues: SignupData = {
+    userName: "",
+    email: "",
+    password: "",
+  };
+
+
   
-  const navigate = useNavigate()
-  const initialValues : SignupData = {
-    userName: '',
-    email: '',
-    password: ''
-  }
-const validationSchema = Yup.object({
+  const validationSchema = Yup.object({
     userName: Yup.string().required("Required"),
     email: Yup.string().email("Invalid email address").required("Required"),
     password: Yup.string().required("Required"),
   });
-  const navigateToLogin = () =>  {
-     navigate(Routs.login)
-  }
-  const doSingUp = async (values: SignupData) => {
-    const{data,error} = await supabase.from("social-media").insert([{userName: values.userName,email: values.email,password: values.password}])
-    console.log("===>",data)
-    console.log("err",error)
+  const navigateToLogin = () => {
+    navigate(Routs.login);
   };
-	const onSubmit = async (
-		values: SignupData,
-		setSubmitting: (isSubmitting: boolean) => void
-	) => {
-		await doSingUp(values);
-		setSubmitting(false);
-	};
+  const doSignUp = async (values: SignupData) => {
+    try {
+      const user = {
+        name: values.userName,
+        email: values.email,
+        password: values.password 
+      }
+      const { data, error } = await supabase
+        .from('user')
+        .insert([
+         user
+        ])
+        .single();
+      
+        if(data){
+           console.log("===>",data)
+           
+        }
+
+        if(error){
+           toast.error(error.message)
+           console.log("error",error)
+        }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    }
+  };
+  const onSubmit = async (
+    values: SignupData,
+    setSubmitting: (isSubmitting: boolean) => void
+  ) => {
+    await doSignUp(values);
+    setSubmitting(false);
+  };
   return (
     <div
       className={classNames(
@@ -55,28 +79,14 @@ const validationSchema = Yup.object({
         <div
           className={classNames("flex", "flex-col", "items-center", "w-ful")}
         >
-         
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
-						onSubmit={(
-							values,
-							{ setSubmitting }
-						) => {
-							onSubmit(
-								values,
-								setSubmitting
-							);
-						}
-            }
+            onSubmit={(values, { setSubmitting }) => {
+              onSubmit(values, setSubmitting);
+            }}
           >
-            {({
-              values,
-              errors,
-              touched,
-              handleChange,
-              isSubmitting,
-            }) => (
+            {({ values, errors, touched, handleChange, isSubmitting }) => (
               <Form
                 className={classNames(
                   "flex",
@@ -90,8 +100,7 @@ const validationSchema = Yup.object({
                   Sign Up
                 </span>
                 <div className="flex flex-col gap-4 w-full">
-
-                <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2">
                     <label htmlFor="userName">
                       User name
                       <Required />
@@ -115,8 +124,6 @@ const validationSchema = Yup.object({
                       helperText="Enter your user name"
                     />
                   </div>
-
-
 
                   <div className="flex flex-col gap-2">
                     <label htmlFor="email">
@@ -168,7 +175,13 @@ const validationSchema = Yup.object({
                     />
                   </div>
                   <div className="w-full flex flex-col items-end justify-end">
-                     <Button onClick={navigateToLogin} severity="info" outlined className="w-[200px]" label="Go to login"/>
+                    <Button
+                      onClick={navigateToLogin}
+                      severity="info"
+                      outlined
+                      className="w-[200px]"
+                      label="Go to login"
+                    />
                   </div>
                   <Button
                     label={isSubmitting ? "Proceeding..." : "Proceed"}
@@ -182,7 +195,7 @@ const validationSchema = Yup.object({
         </div>
       </Card>
     </div>
-  )
+  );
 }
 
-export default Signup
+export default Signup;
