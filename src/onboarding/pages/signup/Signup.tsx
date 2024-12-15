@@ -11,7 +11,7 @@ import {  useNavigate } from "react-router-dom";
 import { Routs } from "../../../Routs";
 import { supabase } from "../../../config/superBaseClient";
 import toast from 'react-hot-toast';
-import { useEffect } from "react";
+
 
 function Signup() {
   const navigate = useNavigate();
