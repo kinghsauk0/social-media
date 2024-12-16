@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, } from "react";
+import React, { useRef, } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";

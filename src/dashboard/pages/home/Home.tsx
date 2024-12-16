@@ -3,85 +3,29 @@ import { DataScroller } from "primereact/datascroller";
 import { Avatar } from "primereact/avatar";
 import { Button } from "primereact/button";
 import { OrderList } from "primereact/orderlist";
-import { FileUpload } from "primereact/fileupload";
 import { RiUserFollowLine } from "react-icons/ri";
 import { GrLike, GrDislike } from "react-icons/gr";
 import { FaRegCommentAlt } from "react-icons/fa";
-import { useRef, useState } from "react";
-import { supabase } from "../../../config/superBaseClient";
-import { v4 as uuidv4 } from "uuid"; 
+import { useState } from "react";
+
 import {
   activeFriends,
   listData,
   ListItem,
   ActiveFriends,
-} from "../../../assets/DummyData"; 
+} from "../../../assets/DummyData"; // Ensure these paths are correct
 import { InputText } from "primereact/inputtext";
 
-import { Toast } from "primereact/toast";
-
-
 function Home() {
-  const id = uuidv4();
+  
   const [value, setValue] = useState<string>("");
  
-  const [selectedFile, setSelectedFile] = useState(null);
-   const toast = useRef<Toast>(null);
+  
+
 
   // Handle file selection
-  const handleFileChange = (event: any) => {
-    setSelectedFile(event.target.files[0]);
-  };
+  
 
-  // Handle file upload
- 
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      toast.current?.show({
-        severity: "error",
-        summary: "No file selected",
-        detail: "Please select a file to upload!",
-        life: 3000,
-      });
-      return;
-    }
-  
-    
-  
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const filePath = `public/${timestamp}`;
-  
-    try {
-
-      const { data, error } =  await supabase.storage.from('post').upload(id,filePath, selectedFile)
-      if (error) {
-        console.error("Supabase Upload Error:", error.message);
-        toast.current?.show({
-          severity: "error",
-          summary: "Upload Failed",
-          detail: error.message || "Unexpected error occurred during upload.",
-          life: 3000,
-        });
-        return;
-      }
-  
-      toast.current?.show({
-        severity: "success",
-        summary: "Upload Successful",
-        detail: "File has been uploaded successfully!",
-        life: 3000,
-      });
-      console.log("Uploaded file data:", data);
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      toast.current?.show({
-        severity: "error",
-        summary: "Unexpected Error",
-        detail: "An error occurred while uploading the file.",
-        life: 3000,
-      });
-    }
-  };
   
   const itemTemplateList = (data: ListItem) => {
     return (
@@ -166,7 +110,7 @@ function Home() {
             <div className="card border-2 flex-col flex justify-center items-center border-blue-400 rounded-lg h-[150px] flex justify-content-center justify-center mb-4">
            <div >
            <h2 className=" text-lg text-blue-400">Add Image</h2>
-           <input type="file" onChange={handleFileChange} />
+           <input type="file"  />
            </div>
             
             </div>
@@ -175,7 +119,7 @@ function Home() {
               <InputText value={value} onChange={(e)=> setValue(e.target.value)}/>
             </div>
             <div className="mt-4 flex flex-row justify-end items-center">
-              <Button onClick={handleUpload} label="Add Post"/>
+              <Button  label="Add Post"/>
             </div>
           </Card>
         </div>
@@ -190,7 +134,6 @@ function Home() {
           </Card>
         </div>
       </div>
-      <Toast position="bottom-center" ref={toast} />
     </div>
   );
 }
