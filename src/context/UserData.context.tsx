@@ -40,6 +40,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }));
     };
 
+
+    
     return (
         <UserContext.Provider value={{ UserData, updateUserData }}>
             {children}
