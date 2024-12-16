@@ -9,11 +9,14 @@ import { InputText } from "primereact/inputtext";
 import ValidationMessage from "../../../components/ValidationMessage";
 import {  useNavigate } from "react-router-dom";
 import { Routs } from "../../../Routs";
-import { supabase } from "../../../config/superBaseClient";
 import toast from 'react-hot-toast';
+import {app} from "../../../config/fireBase"
+import { getAuth , createUserWithEmailAndPassword} from "firebase/auth";
+
 
 
 function Signup() {
+   const auth = getAuth(app)
   const navigate = useNavigate();
   const initialValues: SignupData = {
     userName: "",
@@ -21,6 +24,8 @@ function Signup() {
     password: "",
   };
 
+
+  
 
   
   const validationSchema = Yup.object({
@@ -36,27 +41,19 @@ function Signup() {
       const user = {
         name: values.userName,
         email: values.email,
-        password: values.password 
-      }
-      const { data, error } = await supabase
-        .from('user')
-        .insert([
-         user
-        ])
-        .single();
-      
-        if(data){
-           console.log("===>",data)
-           
-        }
+        password: values.password,
+      };
+      await createUserWithEmailAndPassword(auth,user.email,user.password)
 
-        if(error){
-           toast.error(error.message)
-           console.log("error",error)
-        }
+      const userData = auth.currentUser
+       if(userData){
+        toast.success("User created secssfully")
+        navigate(Routs.login)
+       }
     } catch (err) {
       console.error("Unexpected error:", err);
     }
+     
   };
   const onSubmit = async (
     values: SignupData,

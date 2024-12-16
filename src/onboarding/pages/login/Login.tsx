@@ -1,33 +1,66 @@
-import { Form, Formik } from "formik";
-import { Card } from "primereact/card";
-import { InputText } from "primereact/inputtext";
-import { classNames } from "primereact/utils";
-import * as Yup from "yup";
-import { LoginData } from "../../../utils/Types";
-import Required from "../../../components/Requied";
-import ValidationMessage from "../../../components/ValidationMessage";
 import { Button } from "primereact/button";
-import { useNavigate } from "react-router-dom";
+import { Card } from "primereact/card";
+import { LoginData } from "../../../utils/Types";
+import * as Yup from "yup";
+import { classNames } from "primereact/utils";
+import { Form, Formik } from "formik";
+import Required from "../../../components/Requied";
+import { InputText } from "primereact/inputtext";
+import ValidationMessage from "../../../components/ValidationMessage";
+import {  useNavigate } from "react-router-dom";
 import { Routs } from "../../../Routs";
+import toast from 'react-hot-toast';
+import {app} from "../../../config/fireBase"
+import { getAuth , createUserWithEmailAndPassword} from "firebase/auth";
+
+
 
 function Login() {
-
-  const navigate = useNavigate()
-
-
+   const auth = getAuth(app)
+  const navigate = useNavigate();
   const initialValues: LoginData = {
+    
     email: "",
     password: "",
   };
+
+
+  
+
+  
   const validationSchema = Yup.object({
+  
     email: Yup.string().email("Invalid email address").required("Required"),
     password: Yup.string().required("Required"),
   });
+  
+  const doLogin = async (values: LoginData) => {
+    try {
+      const user = {
+       
+        email: values.email,
+        password: values.password,
+      };
+      await createUserWithEmailAndPassword(auth,user.email,user.password)
 
-  const navigateToSignUp = () => {
-    navigate(Routs.signUp)
-  }
-
+      const userData = auth.currentUser
+       if(userData){
+        toast.success("User created secssfully")
+        localStorage.setItem("token",userData.email!)
+        navigate(Routs.deshboard)
+       }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    }
+     
+  };
+  const onSubmit = async (
+    values: LoginData,
+    setSubmitting: (isSubmitting: boolean) => void
+  ) => {
+    await doLogin(values);
+    setSubmitting(false);
+  };
   return (
     <div
       className={classNames(
@@ -42,21 +75,14 @@ function Login() {
         <div
           className={classNames("flex", "flex-col", "items-center", "w-ful")}
         >
-          
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
-            onSubmit={(values) => {
-              console.log("====>",values)
+            onSubmit={(values, { setSubmitting }) => {
+              onSubmit(values, setSubmitting);
             }}
           >
-            {({
-              values,
-              errors,
-              touched,
-              handleChange,
-              isSubmitting,
-            }) => (
+            {({ values, errors, touched, handleChange, isSubmitting }) => (
               <Form
                 className={classNames(
                   "flex",
@@ -67,9 +93,11 @@ function Login() {
                 )}
               >
                 <span className={classNames("text-2xl", "font-bold")}>
-                  Login
+                  Log In
                 </span>
                 <div className="flex flex-col gap-4 w-full">
+                  
+
                   <div className="flex flex-col gap-2">
                     <label htmlFor="email">
                       Email
@@ -119,9 +147,7 @@ function Login() {
                       helperText="Enter your password"
                     />
                   </div>
-                  <div className="w-full flex flex-col items-end justify-end">
-                     <Button onClick={navigateToSignUp} severity="info" outlined className="w-[200px]" label="Create a new account"/>
-                  </div>
+                  
                   <Button
                     label={isSubmitting ? "Proceeding..." : "Proceed"}
                     type="submit"
