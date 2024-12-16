@@ -7,28 +7,82 @@ import { FileUpload } from "primereact/fileupload";
 import { RiUserFollowLine } from "react-icons/ri";
 import { GrLike, GrDislike } from "react-icons/gr";
 import { FaRegCommentAlt } from "react-icons/fa";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { supabase } from "../../../config/superBaseClient";
+import { v4 as uuidv4 } from "uuid"; 
 import {
   activeFriends,
   listData,
   ListItem,
   ActiveFriends,
-} from "../../../assets/DummyData"; // Ensure these paths are correct
+} from "../../../assets/DummyData"; 
 import { InputText } from "primereact/inputtext";
 
+import { Toast } from "primereact/toast";
+
+
 function Home() {
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const id = uuidv4();
   const [value, setValue] = useState<string>("");
-  const handleFileUpload = (event: { files: File[] }) => {
-    const files = event.files;
-    setUploadedFiles((prev) => {
-      const updatedFiles = [...prev, ...files];
-      return updatedFiles;
-    });
+ 
+  const [selectedFile, setSelectedFile] = useState(null);
+   const toast = useRef<Toast>(null);
+
+  // Handle file selection
+  const handleFileChange = (event: any) => {
+    setSelectedFile(event.target.files[0]);
   };
 
+  // Handle file upload
+ 
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      toast.current?.show({
+        severity: "error",
+        summary: "No file selected",
+        detail: "Please select a file to upload!",
+        life: 3000,
+      });
+      return;
+    }
   
+    
+  
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const filePath = `public/${timestamp}`;
+  
+    try {
 
+      const { data, error } =  await supabase.storage.from('post').upload(id,filePath, selectedFile)
+      if (error) {
+        console.error("Supabase Upload Error:", error.message);
+        toast.current?.show({
+          severity: "error",
+          summary: "Upload Failed",
+          detail: error.message || "Unexpected error occurred during upload.",
+          life: 3000,
+        });
+        return;
+      }
+  
+      toast.current?.show({
+        severity: "success",
+        summary: "Upload Successful",
+        detail: "File has been uploaded successfully!",
+        life: 3000,
+      });
+      console.log("Uploaded file data:", data);
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      toast.current?.show({
+        severity: "error",
+        summary: "Unexpected Error",
+        detail: "An error occurred while uploading the file.",
+        life: 3000,
+      });
+    }
+  };
+  
   const itemTemplateList = (data: ListItem) => {
     return (
       <Card className="w-full pl-28">
@@ -69,7 +123,10 @@ function Home() {
     );
   };
 
-  console.log("uploding", uploadedFiles);
+
+  
+
+ 
 
   const itemTemplate = (item: ActiveFriends) => {
     return (
@@ -106,25 +163,19 @@ function Home() {
       <div className="h-screen w-[50%] flex flex-col">
         <div className="h-[40%] w-full flex flex-row justify-center items-center">
           <Card className="w-[500px] h-[350px] border-2 border-blue-400 rounded-lg">
-            <div className="card flex justify-content-center justify-center mb-4">
-              <FileUpload
-                mode="advanced"
-                name="demo[]"
-                customUpload
-                accept="image/*"
-                maxFileSize={1000000}
-                onUpload={handleFileUpload}
-                chooseLabel="Add Image" // Custom label for the choose button
-                uploadLabel="Upload" // Custom label for the upload button
-                cancelLabel="Cancel" // Custom label for the cancel button
-              />
+            <div className="card border-2 flex-col flex justify-center items-center border-blue-400 rounded-lg h-[150px] flex justify-content-center justify-center mb-4">
+           <div >
+           <h2 className=" text-lg text-blue-400">Add Image</h2>
+           <input type="file" onChange={handleFileChange} />
+           </div>
+            
             </div>
             <div className="card flex justify-content-center flex-row gap-2 items-center">
               <label className=" text-lg">Deception</label>
               <InputText value={value} onChange={(e)=> setValue(e.target.value)}/>
             </div>
             <div className="mt-4 flex flex-row justify-end items-center">
-              <Button label="Add Post"/>
+              <Button onClick={handleUpload} label="Add Post"/>
             </div>
           </Card>
         </div>
@@ -139,6 +190,7 @@ function Home() {
           </Card>
         </div>
       </div>
+      <Toast position="bottom-center" ref={toast} />
     </div>
   );
 }

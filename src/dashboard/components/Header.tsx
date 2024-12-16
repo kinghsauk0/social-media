@@ -1,4 +1,4 @@
-import React, { useRef, } from "react";
+import React, { useEffect, useRef, } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
@@ -6,6 +6,7 @@ import { InputText } from "primereact/inputtext";
 import { Avatar } from "primereact/avatar";
 import { MenuItem } from "primereact/menuitem";
 import { TieredMenu } from "primereact/tieredmenu";
+import Cookies from "cookies-js";
 
 interface Props {
   globalFilterValue?: string;
@@ -19,13 +20,16 @@ const items: MenuItem[] = [
       icon: "pi pi-sign-out",
       className: "danger",
       command: () => {
-         console.log("Log out")
+        Cookies.expire("token");
+        window.location.reload(); 
       },
     },
   ];
 
 function Header({ globalFilterValue, onGlobalFilterChange }: Props) {
+    const email = Cookies.get("email")
 
+    
     const menu = useRef<TieredMenu | null>(null);
   return (
     <div className="row-span-1 col-span-2  p-5 w-full flex flex-row justify-end items-center bg-blue-400 h-[60px] gap-8">
@@ -40,7 +44,7 @@ function Header({ globalFilterValue, onGlobalFilterChange }: Props) {
       </IconField>
       <div className="flex flex-row items-center gap-2">
       <Avatar icon="pi pi-user" size="large" className="bg-white text-blue-400" shape="circle" />
-      <p className=" text-lg text-white">Kingshuk</p>
+      <p className=" text-lg text-white">{email}</p>
       </div>
       <div className="flex flex-row justify-center items-center" onClick={(e:any) => menu?.current?.toggle(e)}>
         <GiHamburgerMenu />

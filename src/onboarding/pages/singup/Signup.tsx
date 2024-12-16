@@ -9,9 +9,10 @@ import { InputText } from "primereact/inputtext";
 import ValidationMessage from "../../../components/ValidationMessage";
 import {  useNavigate } from "react-router-dom";
 import { Routs } from "../../../Routs";
-import toast from 'react-hot-toast';
 import {app} from "../../../config/fireBase"
 import { getAuth , createUserWithEmailAndPassword} from "firebase/auth";
+import { Toast } from "primereact/toast";
+import { useRef } from "react";
 
 
 
@@ -19,17 +20,18 @@ function Signup() {
    const auth = getAuth(app)
   const navigate = useNavigate();
   const initialValues: SignupData = {
-    userName: "",
     email: "",
     password: "",
   };
 
+  const toast = useRef<Toast>(null);
+
+    
+
 
   
 
-  
   const validationSchema = Yup.object({
-    userName: Yup.string().required("Required"),
     email: Yup.string().email("Invalid email address").required("Required"),
     password: Yup.string().required("Required"),
   });
@@ -39,7 +41,6 @@ function Signup() {
   const doSignUp = async (values: SignupData) => {
     try {
       const user = {
-        name: values.userName,
         email: values.email,
         password: values.password,
       };
@@ -47,11 +48,21 @@ function Signup() {
 
       const userData = auth.currentUser
        if(userData){
-        toast.success("User created secssfully")
         navigate(Routs.login)
+        toast.current?.show({
+          severity: "success",
+          summary: "Signup Successful",
+          detail: "User created successfully",
+          life: 3000,
+        });
        }
     } catch (err) {
-      console.error("Unexpected error:", err);
+      toast.current?.show({
+        severity: "error",
+        summary: "Signup Failed",
+        detail: (err as Error).message || "Unexpected error occurred",
+        life: 3000,
+      });
     }
      
   };
@@ -97,30 +108,7 @@ function Signup() {
                   Sign Up
                 </span>
                 <div className="flex flex-col gap-4 w-full">
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="userName">
-                      User name
-                      <Required />
-                    </label>
-                    <InputText
-                      name="userName"
-                      id="userName"
-                      aria-describedby="userName-help"
-                      placeholder="Enter your user name"
-                      value={values.userName}
-                      onChange={handleChange}
-                      className={classNames(
-                        "w-full",
-                        touched.userName && errors.userName
-                          ? "input-text-danger border-red-500"
-                          : "input-text"
-                      )}
-                    />
-                    <ValidationMessage
-                      name="userName"
-                      helperText="Enter your user name"
-                    />
-                  </div>
+                  
 
                   <div className="flex flex-col gap-2">
                     <label htmlFor="email">
@@ -191,6 +179,7 @@ function Signup() {
           </Formik>
         </div>
       </Card>
+      <Toast position="bottom-center" ref={toast} />
     </div>
   );
 }
